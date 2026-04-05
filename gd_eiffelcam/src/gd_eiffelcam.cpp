@@ -202,7 +202,7 @@ void ImageProcessor::create_decompressor()  {
     cinfo.dct_method = JDCT_FASTEST;
     cinfo.two_pass_quantize = FALSE;
     cinfo.dither_mode = JDITHER_NONE;
-    cinfo.desired_number_of_colors = 1024;
+    cinfo.desired_number_of_colors = 512;  // Reduced from 1024 for performance
     // cinfo.output_gamma = 1.4;
     cinfo.do_fancy_upsampling = FALSE;
     cinfo.out_color_space = JCS_RGB;
@@ -365,7 +365,8 @@ void ImageProcessor::run() {
                     __builtin_prefetch (inbuffer + i, 0, 1);
                 }
 
-                cv::remap(decodedImage, targetFrame, *mapX, *mapY, cv::INTER_LINEAR, cv::BORDER_CONSTANT, cv::Scalar(0, 0, 0));
+                // Use INTER_NEAREST for better performance on Quest 1
+                cv::remap(decodedImage, targetFrame, *mapX, *mapY, cv::INTER_NEAREST, cv::BORDER_CONSTANT, cv::Scalar(0, 0, 0));
             }
 
             // upload
@@ -548,21 +549,24 @@ GDEiffelCam::~GDEiffelCam() {
 
 void GDEiffelCam::_init() {
 
-    // USB Vendor ID and Product ID for Eiffel Camera.
-    vid=0x32e4;
-    pid=0x9750;
-    // Stream characteristics we will attempt to use
-    streamWidth=2560;
-    streamHeight=960;
-    streamFps=60;
+    // USB Vendor ID and Product ID for DJI Action 2 Camera.
+    vid=0x2CA3;
+    pid=0x0021;
+    // Stream characteristics we will attempt to use (1080P @ 30fps)
+    streamWidth=1920;
+    streamHeight=1080;
+    streamFps=30;
 
-    frame_array_size = 10;
+    frame_array_size = 6;  // Reduced from 10 to 6 for Quest 1 performance optimization
 
     singleton = this;
 
     setenv("JSIMD_FORCENEON", "1", 1);
 
     cv::setUseOptimized(true);
+    cv::setUseOptimized(true);
+    cv::setNumThreads(4);  // Limit threads for Snapdragon 835 (4 big cores)
+
     Godot::print(cv::getBuildInformation().c_str());
 
     if (!cv::useOptimized()) {

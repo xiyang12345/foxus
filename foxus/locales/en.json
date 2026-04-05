@@ -1,0 +1,31 @@
+{
+  "locale_name": "English",
+  "locale_code": "en",
+
+  "ui": {
+    "status": {
+      "not_connected": "Not connected",
+      "attached": "Attached",
+      "connected": "Connected"
+    },
+    "buttons": {
+      "ask_for_permission": "Ask for Permission",
+      "calibrate": "Calibrate",
+      "save": "Save",
+      "cancel": "Cancel",
+      "accept": "Accept"
+    },
+    "tabs": {
+      "status": "Status",
+      "options": "Options",
+      "calibration": "Calibration"
+    },
+    "messages": {
+      "camera_not_found": "Camera not found. Please check connection.",
+      "permission_granted": "Camera permission granted",
+      "permission_denied": "Camera permission denied",
+      "calibration_complete": "Calibration complete",
+      "calibration_failed": "Calibration failed"
+    }
+  }
+}

@@ -202,7 +202,7 @@ elif env['platform'] == "android":
     if not 'android_ndk_root' in env:
         raise ValueError("To build for Android, ANDROID_NDK_ROOT must be defined. Please set ANDROID_NDK_ROOT to the root folder of your Android NDK installation.")
 
-    # Validate API level
+    # Validate API level - Quest 1 uses Android 10 (API 29)
     api_level='29'
     arch = 'arm64v8'
     godot_cpp_arch = arch

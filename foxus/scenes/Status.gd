@@ -26,26 +26,48 @@ extends VBoxContainer
 onready var label: Label = get_node("ConnectionStatusContainer/Label")
 onready var rich_text_label: RichTextLabel = get_node("ConnectionStatusContainer/RichTextLabel")
 onready var button: Button = get_node("Button")
+onready var language_manager = get_node("/root/LanguageManager")
 
 enum CONNECTION_STATUS {NOT_CONNECTED, ATTACHED, CONNECTED}
 
-const STATUS_TO_MSG : Array = [
-  "[color=#FF0000]Not connected[/color]",
-  "[color=#0000FF]Attached[/color]",
-  "[color=#00FF00]Connected[/color]"
-]
+var STATUS_TO_MSG : Dictionary = {}
 
 onready var eiffel_camera = get_node("/root/Scene/EiffelCamera")
 
 func _ready():
-  eiffel_camera.connect("camera_status_changed", self, "on_camera_status_changed")
-  button.connect("pressed", self, "on_ask_for_permission_pressed")
+    # Initialize status messages with translations
+    update_translations()
+
+    # Connect to language change signal
+    if language_manager:
+        language_manager.connect("language_changed", self, "on_language_changed")
+
+    eiffel_camera.connect("camera_status_changed", self, "on_camera_status_changed")
+    button.connect("pressed", self, "on_ask_for_permission_pressed")
+
+func update_translations():
+    STATUS_TO_MSG = {
+        CONNECTION_STATUS.NOT_CONNECTED: "[color=#FF0000]" + language_manager.tr("ui.status.not_connected") + "[/color]",
+        CONNECTION_STATUS.ATTACHED: "[color=#0000FF]" + language_manager.tr("ui.status.attached") + "[/color]",
+        CONNECTION_STATUS.CONNECTED: "[color=#00FF00]" + language_manager.tr("ui.status.connected") + "[/color]"
+    }
+
+    # Update button text
+    if button:
+        button.text = language_manager.tr("ui.buttons.ask_for_permission")
+
+func on_language_changed(locale_code):
+    update_translations()
+    # Update current status display
+    if eiffel_camera:
+        var current_status = eiffel_camera.get("camera_status")
+        if current_status != null:
+            on_camera_status_changed(current_status)
 
 func on_camera_status_changed(new_status):
-  rich_text_label.bbcode_text = STATUS_TO_MSG[new_status]
-
-  button.disabled = (new_status != CONNECTION_STATUS.ATTACHED)
+    rich_text_label.bbcode_text = STATUS_TO_MSG[new_status]
+    button.disabled = (new_status != CONNECTION_STATUS.ATTACHED)
 
 func on_ask_for_permission_pressed():
-  eiffel_camera.connect_to_camera()
-  button.disabled = true
+    eiffel_camera.connect_to_camera()
+    button.disabled = true
